@@ -1,97 +1,319 @@
-"""Auto-generated placeholder models from JSON schemas."""
+"""Auto-generated Pydantic v2 models from finefab-shared schemas.
 
-class AgentCatalogSchema:
-    """Derived from agent_catalog.schema.json."""
-    schema_file: str = "agent_catalog.schema.json"
+DO NOT EDIT — regenerate with: python scripts/generate_types.py
+"""
 
-class AgentHandoffSchema:
-    """Derived from agent_handoff.schema.json."""
-    schema_file: str = "agent_handoff.schema.json"
+from __future__ import annotations
 
-class ApiBridgeGovernanceExecutionSchema:
-    """Derived from api_bridge_governance_execution.schema.json."""
-    schema_file: str = "api_bridge_governance_execution.schema.json"
+from typing import Any
 
-class ArtifactWmsIndexRules:
-    """Derived from artifact_wms_index_rules.json."""
-    schema_file: str = "artifact_wms_index_rules.json"
+from pydantic import BaseModel, ConfigDict, Field
 
-class FabPackageSchema:
-    """Derived from fab_package.schema.json."""
-    schema_file: str = "fab_package.schema.json"
+class AgentCatalog(BaseModel):
+    """Kill_LIFE Agent Catalog"""
 
-class InfraVpsSchema:
-    """Derived from infra_vps.schema.json."""
-    schema_file: str = "infra_vps.schema.json"
+    model_config = ConfigDict(extra='allow')
 
-class KillLifeAgentCatalog:
-    """Derived from kill_life_agent_catalog.json."""
-    schema_file: str = "kill_life_agent_catalog.json"
+    contract_version: str
+    updated_at: str
+    repo: str
+    agents: list[Any]
+    legacy_runtime_aliases: dict[str, Any]
+    write_set_conflict_resolution: list[dict[str, Any]] | None = None
 
-class MachineRegistryMesh:
-    """Derived from machine_registry.mesh.json."""
-    schema_file: str = "machine_registry.mesh.json"
 
-class MachineRegistrySchema:
-    """Derived from machine_registry.schema.json."""
-    schema_file: str = "machine_registry.schema.json"
+class AgentHandoff(BaseModel):
+    """Mesh Agent Handoff"""
 
-class MascaradeDispatchMesh:
-    """Derived from mascarade_dispatch.mesh.json."""
-    schema_file: str = "mascarade_dispatch.mesh.json"
+    model_config = ConfigDict(extra='allow')
 
-class MascaradeModelProfilesKxkmAi:
-    """Derived from mascarade_model_profiles.kxkm_ai.json."""
-    schema_file: str = "mascarade_model_profiles.kxkm_ai.json"
+    lot_id: str
+    owner_repo: str
+    owner_agent: str
+    write_set: list[str]
+    preflight: list[str]
+    validations: list[str]
+    evidence: list[str]
+    sync_targets: list[str]
 
-class MascaradeModelProfilesTower:
-    """Derived from mascarade_model_profiles.tower.json."""
-    schema_file: str = "mascarade_model_profiles.tower.json"
 
-class OperatorLaneEvidenceSchema:
-    """Derived from operator_lane_evidence.schema.json."""
-    schema_file: str = "operator_lane_evidence.schema.json"
+class ApiBridgeGovernanceExecution(BaseModel):
+    """Contract defining which fields may traverse the gateway between Kill_LIFE governance agents and Mascarade execution agents."""
 
-class OpsKillLifeErpRegistry:
-    """Derived from ops_kill_life_erp_registry.json."""
-    schema_file: str = "ops_kill_life_erp_registry.json"
+    model_config = ConfigDict(extra='allow')
 
-class OpsMascaradeKillLifeContract:
-    """Derived from ops_mascarade_kill_life.contract.json."""
-    schema_file: str = "ops_mascarade_kill_life.contract.json"
+    metadata: dict[str, Any] = Field(..., alias="metadata", description="Contract metadata.")
+    governance_payload_fields: list[str] = Field(..., alias="governance_payload_fields", description="Fields that belong only to the governance layer.")
+    execution_payload_fields: list[str] = Field(..., alias="execution_payload_fields", description="Fields that may traverse to the execution layer.")
+    bridge_rules: list[dict[str, Any]] = Field(..., alias="bridge_rules", description="Enforcement rules at gateway boundaries.")
 
-class PcbAiFabRegistry:
-    """Derived from pcb_ai_fab_registry.json."""
-    schema_file: str = "pcb_ai_fab_registry.json"
 
-class RepoSnapshotSchema:
-    """Derived from repo_snapshot.schema.json."""
-    schema_file: str = "repo_snapshot.schema.json"
+class ArtifactWmsIndexRules(BaseModel):
 
-class RuntimeMcpIaGatewaySchema:
-    """Derived from runtime_mcp_ia_gateway.schema.json."""
-    schema_file: str = "runtime_mcp_ia_gateway.schema.json"
+    model_config = ConfigDict(extra='allow')
 
-class SummaryShortSchema:
-    """Derived from summary_short.schema.json."""
-    schema_file: str = "summary_short.schema.json"
 
-class WorkflowHandshakeSchema:
-    """Derived from workflow_handshake.schema.json."""
-    schema_file: str = "workflow_handshake.schema.json"
+class FabPackage(BaseModel):
+    """Fab Package"""
 
-class YiacadActionRegistry:
-    """Derived from yiacad_action_registry.json."""
-    schema_file: str = "yiacad_action_registry.json"
+    model_config = ConfigDict(extra='allow')
 
-class YiacadActionRegistrySchema:
-    """Derived from yiacad_action_registry.schema.json."""
-    schema_file: str = "yiacad_action_registry.schema.json"
+    contract_version: str
+    generated_at: str
+    status: str
+    board_id: str
+    source_schematic: str | None
+    source_board: str | None
+    route_origin: str
+    bom_file: str | None
+    cpl_file: str | None
+    gerber_dir: str | None
+    drill_file: str | None
+    drc_report: str | None
+    review_artifacts: list[str]
+    provenance: dict[str, Any]
+    acceptance_gates: dict[str, Any]
+    degraded_reasons: list[str] | None = None
+    next_steps: list[str] | None = None
+    artifacts: list[dict[str, Any]] | None = None
 
-class YiacadContextBrokerSchema:
-    """Derived from yiacad_context_broker.schema.json."""
-    schema_file: str = "yiacad_context_broker.schema.json"
 
-class YiacadUiuxOutputSchema:
-    """Derived from yiacad_uiux_output.schema.json."""
-    schema_file: str = "yiacad_uiux_output.schema.json"
+class InfraVps(BaseModel):
+    """Infra VPS Inventory"""
+
+    model_config = ConfigDict(extra='allow')
+
+    contract_version: str
+    generated_at: str
+    component: str
+    owner_repo: str
+    owner_agent: str | None = None
+    note: str | None = None
+    services: list[Any]
+
+
+class KillLifeAgentCatalog(BaseModel):
+
+    model_config = ConfigDict(extra='allow')
+
+
+class MachineRegistryMesh(BaseModel):
+
+    model_config = ConfigDict(extra='allow')
+
+
+class MachineRegistry(BaseModel):
+    """Kill LIFE Machine Registry"""
+
+    model_config = ConfigDict(extra='allow')
+
+    generated_at: str
+    default_profile: str
+    profiles: list[str]
+    targets: list[dict[str, Any]]
+
+
+class MascaradeDispatchMesh(BaseModel):
+
+    model_config = ConfigDict(extra='allow')
+
+
+class MascaradeModelProfilesKxkmAi(BaseModel):
+
+    model_config = ConfigDict(extra='allow')
+
+
+class MascaradeModelProfilesTower(BaseModel):
+
+    model_config = ConfigDict(extra='allow')
+
+
+class OperatorLaneEvidence(BaseModel):
+    """Full Operator Lane Evidence"""
+
+    model_config = ConfigDict(extra='allow')
+
+    generated_at: str
+    status: str
+    execution_path: str
+    chat_url: str
+    providers_url: str
+    prompt: str
+    provider: str
+    model: str
+    available_providers: list[str]
+    completion: str
+    summary: str
+    error: str | None = None
+    http_status: int | None = None
+    usage: dict[str, Any] | None = None
+
+
+class OpsKillLifeErpRegistry(BaseModel):
+
+    model_config = ConfigDict(extra='allow')
+
+
+class OpsMascaradeKillLifeContract(BaseModel):
+
+    model_config = ConfigDict(extra='allow')
+
+
+class PcbAiFabRegistry(BaseModel):
+
+    model_config = ConfigDict(extra='allow')
+
+
+class RepoSnapshot(BaseModel):
+    """Mesh Repo Snapshot"""
+
+    model_config = ConfigDict(extra='allow')
+
+    machine: str
+    repo: str
+    branch: str
+    sha: str
+    remote: str
+    dirty_set: list[str]
+    required_script: str
+    ssh_health: str
+
+
+class RuntimeMcpIaGateway(BaseModel):
+    """Runtime MCP IA Gateway"""
+
+    model_config = ConfigDict(extra='allow')
+
+    contract_version: str
+    generated_at: str
+    component: str
+    owner_repo: str
+    owner_agent: str
+    owner_subagent: str | None
+    write_set: list[str]
+    status: str
+    summary_short: str
+    evidence: list[str]
+    degraded_reasons: list[str] | None = None
+    next_steps: list[str] | None = None
+    surfaces: dict[str, Any]
+    sources: dict[str, Any] | None = None
+
+
+class SummaryShort(BaseModel):
+    """Summary Short"""
+
+    model_config = ConfigDict(extra='allow')
+
+    contract_version: str
+    generated_at: str
+    component: str
+    lot_id: str | None = None
+    owner_repo: str
+    owner_agent: str
+    owner_subagent: str | None
+    write_set: list[str]
+    status: str
+    summary_short: str
+    evidence: list[str]
+    degraded_reasons: list[str] | None = None
+    next_steps: list[str] | None = None
+
+
+class WorkflowHandshake(BaseModel):
+    """Mesh Workflow Handshake"""
+
+    model_config = ConfigDict(extra='allow')
+
+    contract_version: str
+    schema_version: str
+    producer_repo: str
+    consumer_repo: str
+    compatibility: str
+    workflow_fields: list[str] | None = None
+    evidence: list[str]
+    validations: list[str]
+    sync_targets: list[str]
+    ui_mappings: list[dict[str, Any]] | None = None
+
+
+class YiacadActionRegistry(BaseModel):
+    """Canonical internal registry for YiACAD transport commands, normalized action identifiers, supported surfaces, and engine boundaries."""
+
+    model_config = ConfigDict(extra='allow')
+
+
+class YiacadActionRegistry(BaseModel):
+    """YiACAD Action Registry"""
+
+    model_config = ConfigDict(extra='allow')
+
+    contract_version: Any
+    component: Any
+    description: str | None = None
+    actions: list[dict[str, Any]]
+
+
+class YiacadContextBroker(BaseModel):
+    """YiACAD Context Broker"""
+
+    model_config = ConfigDict(extra='allow')
+
+    component: str
+    generated_at: str
+    surface: str = Field(..., alias="surface", description="YiACAD client surface identifier, e.g. yiacad-desktop, yiacad-web, yiacad-api, tui")
+    context_ref: str | None
+    paths: dict[str, Any]
+    runtime: dict[str, Any]
+
+
+class YiacadUiuxOutput(BaseModel):
+    """YiACAD UI UX Output Contract"""
+
+    model_config = ConfigDict(extra='allow')
+
+    component: str
+    surface: str = Field(..., alias="surface", description="YiACAD client surface identifier, e.g. yiacad-desktop, yiacad-web, yiacad-api, tui")
+    action: str
+    execution_mode: str
+    status: str
+    severity: str
+    summary: str
+    details: str | None = None
+    generated_at: str | None = None
+    context_ref: str | None = None
+    provider: str | None = None
+    model: str | None = None
+    latency_ms: int | None = None
+    degraded_reasons: list[str]
+    engine_status: dict[str, Any]
+    artifacts: list[dict[str, Any]]
+    next_steps: list[str]
+
+
+__all__ = [
+    "AgentCatalog",
+    "AgentHandoff",
+    "ApiBridgeGovernanceExecution",
+    "ArtifactWmsIndexRules",
+    "FabPackage",
+    "InfraVps",
+    "KillLifeAgentCatalog",
+    "MachineRegistryMesh",
+    "MachineRegistry",
+    "MascaradeDispatchMesh",
+    "MascaradeModelProfilesKxkmAi",
+    "MascaradeModelProfilesTower",
+    "OperatorLaneEvidence",
+    "OpsKillLifeErpRegistry",
+    "OpsMascaradeKillLifeContract",
+    "PcbAiFabRegistry",
+    "RepoSnapshot",
+    "RuntimeMcpIaGateway",
+    "SummaryShort",
+    "WorkflowHandshake",
+    "YiacadActionRegistry",
+    "YiacadActionRegistry",
+    "YiacadContextBroker",
+    "YiacadUiuxOutput",
+]

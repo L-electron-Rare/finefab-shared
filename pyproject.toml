@@ -1,4 +1,24 @@
 [project]
-name = "placeholder"
+name = "finefab-shared"
 version = "0.1.0"
+description = "Shared schemas and types for the FineFab ecosystem"
 requires-python = ">=3.12"
+dependencies = [
+    "pydantic>=2.12,<3",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3,<9",
+]
+gen = [
+    "datamodel-code-generator>=0.28,<1",
+]
+
+[build-system]
+requires = ["setuptools>=65", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools.packages.find]
+where = ["python"]
+include = ["finefab_shared*"]
