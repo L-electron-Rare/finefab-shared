@@ -1,34 +1,49 @@
 # finefab-shared
 
-Bibliotheque de contrats et types partages pour l'ecosysteme FineFab.
+Shared contracts and types for the FineFab ecosystem -- JSON Schema, Pydantic models, and TypeScript types.
 
-## Role
-- Centraliser les schemas JSON de reference.
-- Exposer des modeles Python (Pydantic) et des types TypeScript alignes.
-- Stabiliser les interfaces inter-repos (spec-first).
+Part of the [FineFab](https://github.com/L-electron-Rare) platform.
 
-## Stack
-- Python 3.12+
-- TypeScript
-- JSON Schema
+## What it does
 
-## Structure cible
-- `schemas/`: contrats JSON Schema
-- `python/`: modeles et utilitaires Python
-- `typescript/`: types et utilitaires TypeScript
-- `scripts/`: generation/validation de types
+- Centralizes JSON Schema definitions used across all FineFab repos
+- Exposes aligned Python (Pydantic) models and TypeScript types from a single source
+- Validates inter-service contracts at CI time
+- Enables spec-first development: schema changes propagate to all consumers
 
-## Demarrage rapide
+## Tech stack
+
+Python 3.12+ / TypeScript / JSON Schema
+
+## Quick start
+
 ```bash
 # Python
 python -m venv .venv && source .venv/bin/activate
 pip install -e .
 
-# Validation schemas (exemple)
+# Generate types from schemas
 python scripts/generate_types.py
 ```
 
-## Roadmap immediate
-- Finaliser la migration des contrats depuis `Kill_LIFE/specs/contracts`.
-- Ajouter CI de validation schema + generation types.
-- Verrouiller versionnement semantique des contrats.
+## Project structure
+
+```
+schemas/      # JSON Schema contract definitions
+python/       # Pydantic models and utilities
+typescript/   # TypeScript types and utilities
+scripts/      # Type generation and validation
+```
+
+## Related repos
+
+| Repo | Role |
+|------|------|
+| [life-core](https://github.com/L-electron-Rare/life-core) | AI backend engine |
+| [life-reborn](https://github.com/L-electron-Rare/life-reborn) | API gateway |
+| [life-web](https://github.com/L-electron-Rare/life-web) | Operator cockpit UI |
+| [life-spec](https://github.com/L-electron-Rare/life-spec) | Functional specifications and BMAD gates |
+
+## License
+
+[MIT](LICENSE)
