@@ -39,6 +39,12 @@ export interface ArtifactWmsIndexRules {
   [key: string]: unknown;
 }
 
+/** Browser Scrape Contract */
+export interface BrowserScrape {
+  request: Record<string, unknown>;
+  response: Record<string, unknown>;
+}
+
 /** Fab Package */
 export interface FabPackage {
   contract_version: string;
