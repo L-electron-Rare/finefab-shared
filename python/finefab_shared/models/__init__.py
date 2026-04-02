@@ -53,6 +53,15 @@ class ArtifactWmsIndexRules(BaseModel):
     model_config = ConfigDict(extra='allow')
 
 
+class BrowserScrape(BaseModel):
+    """Browser Scrape Contract"""
+
+    model_config = ConfigDict(extra='allow')
+
+    request: dict[str, Any]
+    response: dict[str, Any]
+
+
 class FabPackage(BaseModel):
     """Fab Package"""
 
@@ -296,6 +305,7 @@ __all__ = [
     "AgentHandoff",
     "ApiBridgeGovernanceExecution",
     "ArtifactWmsIndexRules",
+    "BrowserScrape",
     "FabPackage",
     "InfraVps",
     "KillLifeAgentCatalog",
