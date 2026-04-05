@@ -8,7 +8,12 @@ export interface AgentCatalog {
   repo: string;
   agents: unknown[];
   legacy_runtime_aliases: Record<string, unknown>;
-  write_set_conflict_resolution?: Record<string, unknown>[];
+  write_set_conflict_resolution?: {
+    paths: string[];
+    agents: string[];
+    rule: string;
+    owner_by_path?: Record<string, unknown>;
+  }[];
 }
 
 /** Mesh Agent Handoff */
@@ -26,13 +31,25 @@ export interface AgentHandoff {
 /** Contract defining which fields may traverse the gateway between Kill_LIFE governance agents and Mascarade execution agents. */
 export interface ApiBridgeGovernanceExecution {
   /** Contract metadata. */
-  metadata: Record<string, unknown>;
+  metadata: {
+    version: string;
+    date: string;
+    owner_repo: string;
+    status: string;
+  };
   /** Fields that belong only to the governance layer. */
   governance_payload_fields: string[];
   /** Fields that may traverse to the execution layer. */
   execution_payload_fields: string[];
   /** Enforcement rules at gateway boundaries. */
-  bridge_rules: Record<string, unknown>[];
+  bridge_rules: {
+    rule_id: string;
+    from: string;
+    to: string;
+    action: string;
+    target_fields: string[];
+    description?: string;
+  }[];
 }
 
 export interface ArtifactWmsIndexRules {
@@ -41,8 +58,16 @@ export interface ArtifactWmsIndexRules {
 
 /** Browser Scrape Contract */
 export interface BrowserScrape {
-  request: Record<string, unknown>;
-  response: Record<string, unknown>;
+  request: {
+    url: string;
+    selector?: string | null;
+    timeout_ms?: number;
+  };
+  response: {
+    url: string;
+    title: string;
+    content: string;
+  };
 }
 
 /** Fab Package */
@@ -60,8 +85,18 @@ export interface FabPackage {
   drill_file: string | null;
   drc_report: string | null;
   review_artifacts: string[];
-  provenance: Record<string, unknown>;
-  acceptance_gates: Record<string, unknown>;
+  provenance: {
+    producer: string;
+    tool: string;
+    mode: string;
+    route_origin: string;
+  };
+  acceptance_gates: {
+    erc_ok: boolean;
+    drc_ok: boolean;
+    bom_review_ok: boolean;
+    artifacts_complete: boolean;
+  };
   degraded_reasons?: string[];
   next_steps?: string[];
   artifacts?: Record<string, unknown>[];
@@ -91,7 +126,21 @@ export interface MachineRegistry {
   generated_at: string;
   default_profile: string;
   profiles: string[];
-  targets: Record<string, unknown>[];
+  targets: {
+    id: string;
+    target: string;
+    host: string;
+    port: number;
+    role: string;
+    priority: number;
+    placement: string;
+    enabled_profiles: string[];
+    critical_repos: string[];
+    non_essential_policy?: string;
+    reserve_only: boolean;
+    load_order_bias?: number;
+    notes?: string;
+  }[];
 }
 
 export interface MascaradeDispatchMesh {
@@ -162,8 +211,24 @@ export interface RuntimeMcpIaGateway {
   evidence: string[];
   degraded_reasons?: string[];
   next_steps?: string[];
-  surfaces: Record<string, unknown>;
-  sources?: Record<string, unknown>;
+  surfaces: {
+    runtime: unknown;
+    mcp: unknown;
+    ia: unknown;
+    firmware_cad?: unknown;
+    web_platform?: unknown;
+    langfuse?: unknown;
+    infra_vps?: unknown;
+  };
+  sources?: {
+    intelligence?: unknown;
+    mesh?: unknown;
+    mascarade?: unknown;
+    firmware_cad?: unknown;
+    web_platform?: unknown;
+    langfuse?: unknown;
+    infra_vps?: unknown;
+  };
 }
 
 /** Summary Short */
@@ -194,7 +259,11 @@ export interface WorkflowHandshake {
   evidence: string[];
   validations: string[];
   sync_targets: string[];
-  ui_mappings?: Record<string, unknown>[];
+  ui_mappings?: {
+    field: string;
+    ui_surface: string;
+    notes?: string;
+  }[];
 }
 
 /** Canonical internal registry for YiACAD transport commands, normalized action identifiers, supported surfaces, and engine boundaries. */
@@ -207,7 +276,20 @@ export interface YiacadActionRegistry {
   contract_version: unknown;
   component: unknown;
   description?: string;
-  actions: Record<string, unknown>[];
+  actions: {
+    transport_command: string;
+    action_id: string;
+    display_name: string;
+    description: string;
+    supported_surfaces: string[];
+    required_inputs: string[];
+    accepted_inputs: string[];
+    engine_families: string[];
+    produced_artifacts: string[];
+    default_next_steps: string[];
+    intent_aliases?: string[];
+    native_handler: string;
+  }[];
 }
 
 /** YiACAD Context Broker */
@@ -217,8 +299,30 @@ export interface YiacadContextBroker {
   /** YiACAD client surface identifier, e.g. yiacad-desktop, yiacad-web, yiacad-api, tui */
   surface: string;
   context_ref: string | null;
-  paths: Record<string, unknown>;
-  runtime: Record<string, unknown>;
+  paths: {
+    source_path: string | null;
+    board: string | null;
+    schematic: string | null;
+    freecad_document: string | null;
+    artifacts_dir: string | null;
+  };
+  runtime: {
+    root: string;
+    artifacts_root: string;
+    fusion_status_path: string | null;
+    engine_baseline: {
+      kicad?: string;
+      freecad?: string;
+      kibot?: string;
+      kiauto?: string;
+    };
+    integrated_engines: {
+      kicad?: unknown;
+      freecad?: unknown;
+      kibot?: unknown;
+      kiauto?: unknown;
+    };
+  };
 }
 
 /** YiACAD UI UX Output Contract */
@@ -238,7 +342,16 @@ export interface YiacadUiuxOutput {
   model?: string | null;
   latency_ms?: number | null;
   degraded_reasons: string[];
-  engine_status: Record<string, unknown>;
-  artifacts: Record<string, unknown>[];
+  engine_status: {
+    kicad?: unknown;
+    freecad?: unknown;
+    kibot?: unknown;
+    kiauto?: unknown;
+  };
+  artifacts: {
+    kind: string;
+    path: string;
+    label?: string | null;
+  }[];
   next_steps: string[];
 }
