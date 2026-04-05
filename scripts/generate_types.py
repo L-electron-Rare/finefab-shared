@@ -2,6 +2,7 @@
 """Generate Pydantic v2 models and TypeScript interfaces from JSON schemas."""
 
 import json
+import keyword
 import re
 import sys
 from pathlib import Path
@@ -20,16 +21,69 @@ def sanitize_name(name: str) -> str:
     return "".join(p.capitalize() for p in parts if p)
 
 
-def json_type_to_python(prop: dict) -> str:
+def sanitize_python_identifier(name: str) -> str:
+    """Convert a schema property name to a valid Python field name."""
+    sanitized = name.replace("-", "_").replace(".", "_")
+    sanitized = re.sub(r"\W", "_", sanitized)
+    if not sanitized:
+        sanitized = "field"
+    if sanitized[0].isdigit():
+        sanitized = f"field_{sanitized}"
+    if keyword.iskeyword(sanitized):
+        sanitized = f"{sanitized}_"
+    return sanitized
+
+
+def json_type_to_python(
+    prop: dict,
+    *,
+    parent_name: str,
+    prop_name: str,
+    nested_models: list[str],
+    emitted_nested_models: set[str],
+) -> str:
     """Map JSON Schema type to Python type annotation."""
     t = prop.get("type", "Any")
     if isinstance(t, list):
         # Handle nullable types like ["string", "null"]
-        types = [json_type_to_python({"type": x}) for x in t if x != "null"]
+        types = [
+            json_type_to_python(
+                {**prop, "type": x},
+                parent_name=parent_name,
+                prop_name=prop_name,
+                nested_models=nested_models,
+                emitted_nested_models=emitted_nested_models,
+            )
+            for x in t
+            if x != "null"
+        ]
         base = types[0] if types else "Any"
         if "null" in t:
             return f"{base} | None"
         return base
+
+    if t == "array" and "items" in prop:
+        item_type = json_type_to_python(
+            prop["items"],
+            parent_name=parent_name,
+            prop_name=f"{prop_name}_item",
+            nested_models=nested_models,
+            emitted_nested_models=emitted_nested_models,
+        )
+        return f"list[{item_type}]"
+
+    if t == "object" and prop.get("properties"):
+        nested_name = f"{parent_name}{sanitize_name(prop_name)}"
+        if nested_name not in emitted_nested_models:
+            emitted_nested_models.add(nested_name)
+            nested_models.extend(
+                generate_pydantic_model_parts(
+                    prop,
+                    nested_name,
+                    emitted_nested_models=emitted_nested_models,
+                )
+            )
+        return nested_name
 
     mapping = {
         "string": "str",
@@ -41,19 +95,47 @@ def json_type_to_python(prop: dict) -> str:
         "null": "None",
     }
 
-    if t == "array" and "items" in prop:
-        item_type = json_type_to_python(prop["items"])
-        return f"list[{item_type}]"
-
     return mapping.get(t, "Any")
 
 
-def json_type_to_ts(prop: dict) -> str:
+def format_ts_property(name: str, ts_type: str, optional: bool, indent: int) -> list[str]:
+    """Render a TypeScript property, including multiline inline object types."""
+    prefix = "  " * indent + f"{name}{'?' if optional else ''}: "
+
+    if "\n" not in ts_type:
+        return [f"{prefix}{ts_type};"]
+
+    lines = ts_type.splitlines()
+    lines[0] = prefix + lines[0]
+    lines[-1] = lines[-1] + ";"
+    return lines
+
+
+def json_type_to_ts(prop: dict, *, indent: int = 0) -> str:
     """Map JSON Schema type to TypeScript type."""
     t = prop.get("type", "unknown")
     if isinstance(t, list):
-        types = [json_type_to_ts({"type": x}) for x in t]
+        types = [json_type_to_ts({**prop, "type": x}, indent=indent) for x in t]
         return " | ".join(types)
+
+    if t == "array" and "items" in prop:
+        item_type = json_type_to_ts(prop["items"], indent=indent)
+        return f"{item_type}[]"
+
+    if t == "object" and prop.get("properties"):
+        lines = ["{"]
+        required = set(prop.get("required", []))
+        for prop_name, prop_schema in prop["properties"].items():
+            lines.extend(
+                format_ts_property(
+                    prop_name,
+                    json_type_to_ts(prop_schema, indent=indent + 1),
+                    optional=prop_name not in required,
+                    indent=indent + 1,
+                )
+            )
+        lines.append(f"{'  ' * indent}}}")
+        return "\n".join(lines)
 
     mapping = {
         "string": "string",
@@ -65,16 +147,18 @@ def json_type_to_ts(prop: dict) -> str:
         "null": "null",
     }
 
-    if t == "array" and "items" in prop:
-        item_type = json_type_to_ts(prop["items"])
-        return f"{item_type}[]"
-
     return mapping.get(t, "unknown")
 
 
-def generate_pydantic_model(schema: dict, class_name: str) -> str:
+def generate_pydantic_model_parts(
+    schema: dict,
+    class_name: str,
+    *,
+    emitted_nested_models: set[str],
+) -> list[str]:
     """Generate a Pydantic v2 model from a JSON Schema."""
     lines = []
+    nested_models: list[str] = []
 
     props = schema.get("properties", {})
     required = set(schema.get("required", []))
@@ -88,14 +172,20 @@ def generate_pydantic_model(schema: dict, class_name: str) -> str:
     if not props:
         lines.append("    model_config = ConfigDict(extra='allow')")
         lines.append("")
-        return "\n".join(lines)
+        return ["\n".join(lines)]
 
     lines.append("    model_config = ConfigDict(extra='allow')")
     lines.append("")
 
     for prop_name, prop_schema in props.items():
-        py_type = json_type_to_python(prop_schema)
-        field_name = prop_name.replace("-", "_").replace(".", "_")
+        py_type = json_type_to_python(
+            prop_schema,
+            parent_name=class_name,
+            prop_name=prop_name,
+            nested_models=nested_models,
+            emitted_nested_models=emitted_nested_models,
+        )
+        field_name = sanitize_python_identifier(prop_name)
         prop_desc = prop_schema.get("description", "")
 
         if prop_name in required:
@@ -120,7 +210,18 @@ def generate_pydantic_model(schema: dict, class_name: str) -> str:
                 lines.append(f"    {field_name}: {py_type} = None")
 
     lines.append("")
-    return "\n".join(lines)
+    return nested_models + ["\n".join(lines)]
+
+
+def generate_pydantic_model(schema: dict, class_name: str) -> str:
+    """Generate a Pydantic v2 model from a JSON Schema."""
+    return "\n\n".join(
+        generate_pydantic_model_parts(
+            schema,
+            class_name,
+            emitted_nested_models=set(),
+        )
+    )
 
 
 def generate_ts_interface(schema: dict, name: str) -> str:
@@ -135,12 +236,18 @@ def generate_ts_interface(schema: dict, name: str) -> str:
     lines.append(f"export interface {name} {{")
 
     for prop_name, prop_schema in props.items():
-        ts_type = json_type_to_ts(prop_schema)
-        optional = "" if prop_name in required else "?"
+        ts_type = json_type_to_ts(prop_schema, indent=1)
         desc = prop_schema.get("description", "")
         if desc:
             lines.append(f"  /** {desc} */")
-        lines.append(f"  {prop_name}{optional}: {ts_type};")
+        lines.extend(
+            format_ts_property(
+                prop_name,
+                ts_type,
+                optional=prop_name not in required,
+                indent=1,
+            )
+        )
 
     if not props:
         lines.append("  [key: string]: unknown;")
